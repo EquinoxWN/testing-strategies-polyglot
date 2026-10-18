@@ -1,0 +1,78 @@
+# Shared specification: every implementation must give exactly these answers.
+# Columns (tab-separated): id, expected ("ok:<value>" or "error:<code>"), operation, arguments...
+# Money amounts are integer minor units (cents for USD); scales: USD 2, EUR 2, JPY 0, BHD 3.
+# Lists are comma-separated; date ranges are start/end with the end excluded.
+p1	ok:1234	parse	12.34	USD
+p2	ok:-50	parse	-0.50	USD
+p3	ok:5	parse	0.05	USD
+p4	error:invalid_amount	parse	1.234	USD
+p5	ok:1000	parse	1000	JPY
+p6	error:invalid_amount	parse	10.5	JPY
+p7	ok:1500	parse	1.5	BHD
+p8	error:invalid_amount	parse	1,000.00	USD
+p9	error:invalid_amount	parse	12.3abc	USD
+p10	error:unknown_currency	parse	1.00	XYZ
+p11	ok:-5	parse	-0.05	EUR
+p12	error:invalid_amount	parse		USD
+p13	ok:9007199254740991	parse	90071992547409.91	USD
+p14	error:overflow	parse	90071992547409.92	USD
+p15	ok:0	parse	-0	USD
+a1	ok:300	add	100	200	USD
+a2	ok:9007199254740991	add	9007199254740990	1	USD
+a3	error:overflow	add	9007199254740991	1	USD
+a4	error:overflow	add	-9007199254740991	-1	USD
+a5	ok:-100	subtract	100	200	USD
+a6	error:overflow	subtract	-9007199254740991	1	USD
+m1	ok:1234	multiply	1000	USD	1.2345
+m2	ok:1236	multiply	1000	USD	1.2355
+m3	ok:-1234	multiply	-1000	USD	1.2345
+m4	ok:2	multiply	3	USD	0.5
+m5	ok:2	multiply	5	USD	0.5
+m6	ok:300	multiply	1999	USD	0.15
+m7	error:overflow	multiply	9007199254740991	USD	2
+m8	error:invalid_factor	multiply	100	USD	1.5x
+m9	ok:33	multiply	100	JPY	0.333
+m10	ok:-4	multiply	7	USD	-0.5
+m11	ok:4	multiply	1000	USD	0.0035
+m12	ok:54	multiply	100	USD	0.545
+al1	ok:34,33,33	allocate	100	USD	1,1,1
+al2	ok:3,2	allocate	5	USD	1,1
+al3	ok:-34,-33,-33	allocate	-100	USD	1,1,1
+al4	ok:0,100	allocate	100	USD	0,1
+al5	ok:167,333,500	allocate	1000	USD	1,2,3
+al6	error:invalid_ratios	allocate	100	USD	0,0
+al7	error:invalid_ratios	allocate	100	USD	1,-1
+al8	ok:0,4,3	allocate	7	USD	0,1,1
+f1	ok:12.34 USD	format	1234	USD
+f2	ok:-0.05 USD	format	-5	USD
+f3	ok:1000 JPY	format	1000	JPY
+f4	ok:1.500 BHD	format	1500	BHD
+f5	ok:0.00 EUR	format	0	EUR
+f6	ok:-1234.56 EUR	format	-123456	EUR
+d1	ok:30	days	2024-01-01	2024-01-31
+d2	ok:29	days	2024-02-01	2024-03-01
+d3	ok:28	days	2023-02-01	2023-03-01
+d4	ok:0	days	2024-05-05	2024-05-05
+d5	error:invalid_range	days	2024-05-06	2024-05-05
+d6	error:invalid_date	days	2024-13-01	2024-12-01
+d7	error:invalid_date	days	2023-02-29	2023-03-01
+c1	ok:true	contains	2024-01-01	2024-01-10	2024-01-01
+c2	ok:false	contains	2024-01-01	2024-01-10	2024-01-10
+c3	ok:true	contains	2024-01-01	2024-01-10	2024-01-09
+c4	ok:false	contains	2024-01-01	2024-01-10	2023-12-31
+o1	ok:true	overlaps	2024-01-01	2024-01-10	2024-01-05	2024-01-15
+o2	ok:false	overlaps	2024-01-01	2024-01-10	2024-01-10	2024-01-20
+o3	ok:false	overlaps	2024-01-01	2024-01-10	2024-01-03	2024-01-03
+o4	ok:true	overlaps	2024-01-05	2024-01-06	2024-01-01	2024-02-01
+s1	ok:2024-01-15/2024-02-01,2024-02-01/2024-03-01,2024-03-01/2024-03-10	split	2024-01-15	2024-03-10
+s2	ok:2024-12-20/2025-01-01,2025-01-01/2025-01-05	split	2024-12-20	2025-01-05
+s3	ok:2024-01-01/2024-02-01	split	2024-01-01	2024-02-01
+s4	ok:	split	2024-01-01	2024-01-01
+l1	ok:2024-03-10	localdate	2024-03-10T06:30:00Z	America/New_York
+l2	ok:2024-03-09	localdate	2024-03-10T04:30:00Z	America/New_York
+l3	ok:2024-07-01	localdate	2024-07-01T04:30:00Z	America/New_York
+l4	ok:2024-01-01	localdate	2024-01-01T00:30:00Z	Asia/Tokyo
+l5	ok:2024-01-01	localdate	2023-12-31T15:30:00Z	Asia/Tokyo
+l6	error:invalid_zone	localdate	2024-01-01T00:00:00Z	Mars/Base
+l7	error:invalid_date	localdate	2024-01-01T25:00:00Z	UTC
+l8	ok:2024-06-16	localdate	2024-06-15T23:59:59Z	Pacific/Kiritimati

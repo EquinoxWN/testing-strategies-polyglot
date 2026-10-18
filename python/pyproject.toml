@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=80"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "testing-strategies-polyglot"
+version = "0.1.0"
+description = "Why bugs still ship at 90% coverage: one small library tested several ways in three languages, showing which technique catches which bug."
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+# tzdata: the IANA time zone database, so zoneinfo works the same on Windows, macOS and Linux.
+dependencies = ["tzdata>=2025.2"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "ruff>=0.6", "mypy>=1.11", "pip-audit>=2.7"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-p no:cacheprovider"
+filterwarnings = ["error"]
+
+[tool.ruff]
+line-length = 120
+extend-exclude = [".tmp", ".venv"]
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "B", "UP", "S", "SIM", "RUF", "N", "C4", "PT", "RET", "PIE", "PERF"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101"]
+
+[tool.mypy]
+strict = true
+files = ["src", "tests"]

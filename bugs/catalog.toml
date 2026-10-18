@@ -1,0 +1,205 @@
+# Twenty seeded bugs. Each is an exact find-and-replace in one source file (the find text must occur
+# exactly once) and names a witness row of spec/vectors.tsv whose answer the bug changes.
+# `python scripts/bugs.py verify` applies each bug to a scratch copy and runs the spec through it;
+# `python scripts/bugs.py materialize DIR` writes a tree with all twenty applied (generated on demand, not kept as a branch).
+# Strings are TOML literal strings: backslashes are taken as written.
+
+[[bug]]
+id = "J1"
+language = "java"
+file = "src/main/java/portfolio/tsp/Money.java"
+category = "rounding"
+title = "multiply rounds half up instead of half even"
+find = 'if (cmp > 0 || (cmp == 0 && q.testBit(0))) {'
+replace = 'if (cmp >= 0) {'
+witness = "m1"
+
+[[bug]]
+id = "J2"
+language = "java"
+file = "src/main/java/portfolio/tsp/Money.java"
+category = "overflow"
+title = "add skips the range check"
+find = 'return checked(BigInteger.valueOf(a).add(BigInteger.valueOf(b)));'
+replace = 'return a + b;'
+witness = "a3"
+
+[[bug]]
+id = "J3"
+language = "java"
+file = "src/main/java/portfolio/tsp/DateRanges.java"
+category = "off-by-one"
+title = "days counts the excluded end date"
+find = 'return ChronoUnit.DAYS.between(r[0], r[1]);'
+replace = 'return ChronoUnit.DAYS.between(r[0], r[1]) + 1;'
+witness = "d1"
+
+[[bug]]
+id = "J4"
+language = "java"
+file = "src/main/java/portfolio/tsp/DateRanges.java"
+category = "time zone"
+title = "local date taken in UTC instead of the requested zone"
+find = 'return LocalDate.ofInstant(moment, tz);'
+replace = 'return LocalDate.ofInstant(moment, java.time.ZoneOffset.UTC);'
+witness = "l2"
+
+[[bug]]
+id = "J5"
+language = "java"
+file = "src/main/java/portfolio/tsp/DateRanges.java"
+category = "off-by-one"
+title = "ranges that only touch are reported as overlapping"
+find = 'return a[0].isBefore(b[1]) && b[0].isBefore(a[1]);'
+replace = 'return !a[0].isAfter(b[1]) && !b[0].isAfter(a[1]);'
+witness = "o2"
+
+[[bug]]
+id = "J6"
+language = "java"
+file = "src/main/java/portfolio/tsp/Money.java"
+category = "allocation"
+title = "leftover minor units go to the last parts instead of the first"
+find = 'for (int i = 0; i < ratios.length && leftover > 0; i++) {'
+replace = 'for (int i = ratios.length - 1; i >= 0 && leftover > 0; i--) {'
+witness = "al1"
+
+[[bug]]
+id = "J7"
+language = "java"
+file = "src/main/java/portfolio/tsp/Money.java"
+category = "parsing"
+title = "extra decimals are silently truncated instead of refused"
+find = '"^-?\\d{1,16}(\\.\\d{1," + digits + "})?$"'
+replace = '"^-?\\d{1,16}(\\.\\d+)?$"'
+witness = "p4"
+
+[[bug]]
+id = "P1"
+language = "python"
+file = "src/testing_strategies_polyglot/money.py"
+category = "rounding"
+title = "multiply goes through binary floating point"
+find = 'return checked(round_half_even(minor * numerator, denominator))'
+replace = 'return checked(round(minor * float(factor)))'
+witness = "m12"
+
+[[bug]]
+id = "P2"
+language = "python"
+file = "src/testing_strategies_polyglot/dates.py"
+category = "edge case"
+title = "an empty range overlaps when only one side is empty"
+find = 'if a == b or c == d:'
+replace = 'if a == b and c == d:'
+witness = "o3"
+
+[[bug]]
+id = "P3"
+language = "python"
+file = "src/testing_strategies_polyglot/dates.py"
+category = "time zone"
+title = "the zone offset of January 1 is used all year (daylight saving ignored)"
+find = 'return moment.astimezone(tz).date()'
+replace = 'return (moment + tz.utcoffset(datetime(moment.year, 1, 1))).date()'
+witness = "l3"
+
+[[bug]]
+id = "P4"
+language = "python"
+file = "src/testing_strategies_polyglot/money.py"
+category = "overflow"
+title = "parse skips the range check"
+find = 'return checked(-minor if negative else minor)'
+replace = 'return -minor if negative else minor'
+witness = "p14"
+
+[[bug]]
+id = "P5"
+language = "python"
+file = "src/testing_strategies_polyglot/dates.py"
+category = "off-by-one"
+title = "contains includes the excluded end date"
+find = 'return s <= d < e'
+replace = 'return s <= d <= e'
+witness = "c2"
+
+[[bug]]
+id = "P6"
+language = "python"
+file = "src/testing_strategies_polyglot/money.py"
+category = "formatting"
+title = "format always prints two decimals"
+find = 'body = f"{whole}.{frac:0{digits}d}" if digits else str(whole)'
+replace = 'body = f"{whole}.{frac:02d}"'
+witness = "f3"
+
+[[bug]]
+id = "P7"
+language = "python"
+file = "src/testing_strategies_polyglot/money.py"
+category = "parsing"
+title = "the sign is read from the whole part, so -0.50 becomes 0.50"
+find = 'negative = text.startswith("-")'
+replace = 'negative = int(text.split(".")[0]) < 0'
+witness = "p2"
+
+[[bug]]
+id = "S1"
+language = "js"
+file = "src/money.js"
+category = "rounding"
+title = "multiply uses Number and Math.round (half up)"
+find = 'return checked(roundHalfEven(minor * numerator, denominator));'
+replace = 'return checked(BigInt(Math.round(Number(minor) * Number(factor))));'
+witness = "m5"
+
+[[bug]]
+id = "S2"
+language = "js"
+file = "src/money.js"
+category = "overflow"
+title = "subtract skips the range check"
+find = 'return checked(a - b);'
+replace = 'return a - b;'
+witness = "a6"
+
+[[bug]]
+id = "S3"
+language = "js"
+file = "src/dates.js"
+category = "time zone"
+title = "local date taken in the machine's zone instead of the requested one"
+find = '{ timeZone: zone, year: "numeric"'
+replace = '{ year: "numeric"'
+witness = "l2"
+
+[[bug]]
+id = "S4"
+language = "js"
+file = "src/money.js"
+category = "allocation"
+title = "shares computed from the signed amount, so negative amounts lose and flip units"
+find = 'const parts = ratios.map((r) => (magnitude * r) / total);'
+replace = 'const parts = ratios.map((r) => (minor * r) / total);'
+witness = "al3"
+
+[[bug]]
+id = "S5"
+language = "js"
+file = "src/dates.js"
+category = "off-by-one"
+title = "the December piece ends on January 2 instead of January 1"
+find = 'const firstOfNext = m === 12 ? utc(y + 1, 1, 1) : utc(y, m + 1, 1);'
+replace = 'const firstOfNext = m === 12 ? utc(y + 1, 1, 2) : utc(y, m + 1, 1);'
+witness = "s2"
+
+[[bug]]
+id = "S6"
+language = "js"
+file = "src/money.js"
+category = "formatting"
+title = "the fraction is not zero-padded"
+find = 'String(magnitude % unit).padStart(digits, "0")'
+replace = 'String(magnitude % unit)'
+witness = "f2"

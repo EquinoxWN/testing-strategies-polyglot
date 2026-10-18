@@ -1,0 +1,20 @@
+{
+  "name": "testing-strategies-polyglot",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Why bugs still ship at 90% coverage: one small library tested several ways in three languages, showing which technique catches which bug.",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "test": "node --test \"test/*.test.js\"",
+    "lint": "tsc -p tsconfig.json",
+    "evaluate": "node src/evaluate.js"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "devDependencies": {
+    "@types/node": "24.19.1",
+    "typescript": "7.0.2"
+  }
+}
